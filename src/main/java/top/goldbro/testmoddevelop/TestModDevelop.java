@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.goldbro.testmoddevelop.block.ModBlocks;
 import top.goldbro.testmoddevelop.item.ModItemGroups;
 import top.goldbro.testmoddevelop.item.ModItems;
 
@@ -21,8 +22,9 @@ public class TestModDevelop implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
-		ModItems.registerItems();
-		ModItemGroups.registerItemGroups();
+		ModItems.registerItems(); // load items
+		ModItemGroups.registerItemGroups(); // load items groups
+		ModBlocks.registerModBlocks(); // load blocks
 		LOGGER.info("Hello Fabric world!");
 	}
 }
