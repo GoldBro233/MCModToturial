@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.goldbro.testmoddevelop.item.ModItemGroups;
 import top.goldbro.testmoddevelop.item.ModItems;
 
 public class TestModDevelop implements ModInitializer {
@@ -21,6 +22,7 @@ public class TestModDevelop implements ModInitializer {
 		// Proceed with mild caution.
 
 		ModItems.registerItems();
+		ModItemGroups.registerItemGroups();
 		LOGGER.info("Hello Fabric world!");
 	}
 }
