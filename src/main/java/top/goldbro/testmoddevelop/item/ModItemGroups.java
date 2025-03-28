@@ -33,6 +33,7 @@ public class ModItemGroups {
                         .icon(() -> new ItemStack(ModItems.titanium_ingot))
                         .entries((displayContext, entries) -> {
                             entries.add(ModItems.titanium_ingot);
+                            entries.add(ModItems.raw_titanium_ingot);
                         })
                         .build()
                 );

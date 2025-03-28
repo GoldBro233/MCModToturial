@@ -15,6 +15,7 @@ public class ModItems {
 
     // Register New Item in Mod
     public static final Item titanium_ingot = registerItem("material/titanium_ingot", new Item(new Item.Settings()));
+    public static final Item raw_titanium_ingot = registerItem("material/raw_titanium", new Item(new Item.Settings()));
 
     // RegisterItem Method
     public static Item registerItem(String id, Item item) {

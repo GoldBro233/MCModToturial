@@ -1,5 +1,6 @@
 {
   "item.testmoddevelop.material.titanium_ingot": "Titanium Ingot",
+  "item.testmoddevelop.material.raw_titanium": "Raw Titanium Ingot",
   "block.testmoddevelop.titanium_block": "Titanium Block",
   "block.testmoddevelop.titanium_ore": "Titanium Ore",
   "itemGroup.mod_ingredients": "Mod Ingredients",
