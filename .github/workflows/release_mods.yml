@@ -3,7 +3,7 @@ name: Build, Test, and Release Minecraft Mod
 on:
   push:
     branches:
-      - main
+      - main  # 在推送到 main 分支时触发构建和测试，作为 CI 备选
   release:
     types: [created]  # 在创建 Release 时触发完整流程
 
@@ -64,11 +64,9 @@ jobs:
           echo "::set-output name=jar_path::$JAR_FILE"  # 输出路径
 
       - name: Upload the JAR file to GitHub Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1  # 更新为这个动作
         with:
-          upload_url: ${{ github.event.release.upload_url }}  # 指向当前 Release
-          asset_path: ${{ steps.find_jar.outputs.jar_path }}  # 使用动态路径
-          asset_name: ${{ steps.find_jar.outputs.jar_path }}  # 上传文件名保持原样
-          asset_content_type: application/java-archive
+          files: ${{ steps.find_jar.outputs.jar_path }}  # 使用动态路径上传文件
+          tag_name: ${{ github.ref }}  # 假设这是 Release 的标签
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用默认令牌
