@@ -1,12 +1,15 @@
 name: Build, Test, and Release Minecraft Mod
 
 on:
+  push:
+    branches:
+      - main
   release:
-    types: [created]
+    types: [created]  # 在创建 Release 时触发完整流程
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # 运行环境
 
     steps:
       - name: Checkout code
@@ -15,8 +18,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-            java-version: '17'
-            distribution: 'temurin'
+          java-version: '17'  # 根据您的需求调整 Java 版本
+          distribution: 'temurin'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -27,6 +30,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build  # 运行构建步骤
 
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4  # 使用 actions/upload-artifact 上传文件
+        with:
+          name: build-libs  # 工件名称，可以自定义
+          path: build/libs/  # 上传 build/libs 目录
+          retention-days: 1  # 保留时间，仅需临时使用
+
   upload-assets:
     runs-on: ubuntu-latest  # 运行环境
     needs: build-and-test  # 依赖于 build-and-test 作业成功后运行
@@ -36,10 +46,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3  # 重新检出代码
 
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4  # 下载工件
+        with:
+          name: build-libs  # 与上传时匹配的工件名称
+          path: build/libs/  # 下载到 build/libs 目录
+
       - name: Find the main JAR file dynamically
         id: find_jar
         run: |
-          # 搜索 build/libs 下的 testmoddevelop-*.jar 文件，排除 sources.jar
+          # 现在 build/libs 目录应该已经下载好了
           JAR_FILE=$(find build/libs -type f -name "testmoddevelop-*.jar" ! -name "*sources.jar" | head -n 1)
           if [ -z "$JAR_FILE" ]; then
             echo "No matching JAR file found!" >&2
@@ -54,5 +70,5 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}  # 指向当前 Release
           asset_path: ${{ steps.find_jar.outputs.jar_path }}  # 使用动态路径
-          asset_name: ${{ steps.find_jar.outputs.jar_path }}  # 上传文件名保持原样，或自定义如 'testmoddevelop.jar'
+          asset_name: ${{ steps.find_jar.outputs.jar_path }}  # 上传文件名保持原样
           asset_content_type: application/java-archive
