@@ -7,6 +7,9 @@ on:
   release:
     types: [created]  # 在创建 Release 时触发完整流程
 
+permissions:
+  contents: write  # 明确授予写入权限，用于创建或更新 Release
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest  # 运行环境
@@ -40,7 +43,7 @@ jobs:
   upload-assets:
     runs-on: ubuntu-latest  # 运行环境
     needs: build-and-test  # 依赖于 build-and-test 作业成功后运行
-    if: github.event_name == 'release'  # 仅在 release 事件时运行
+    if: github.event_name == 'release' && github.event.action == 'created'  # 仅在 release.created 事件时运行
 
     steps:
       - name: Checkout code
@@ -52,6 +55,12 @@ jobs:
           name: build-libs  # 与上传时匹配的工件名称
           path: build/libs/  # 下载到 build/libs 目录
 
+      - name: Debug event and tag info
+        run: |
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Release Tag: ${{ github.event.release.tag_name }}"
+          echo "GitHub Ref: ${{ github.ref }}"
+
       - name: Find the main JAR file dynamically
         id: find_jar
         run: |
@@ -61,12 +70,13 @@ jobs:
             echo "No matching JAR file found!" >&2
             exit 1  # 如果未找到文件，退出并失败
           fi
+          echo "Found JAR: $JAR_FILE"
           echo "::set-output name=jar_path::$JAR_FILE"  # 输出路径
 
       - name: Upload the JAR file to GitHub Release
-        uses: softprops/action-gh-release@v1  # 更新为这个动作
+        uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.find_jar.outputs.jar_path }}  # 使用动态路径上传文件
-          tag_name: ${{ github.ref }}  # 假设这是 Release 的标签
+          tag_name: ${{ github.event.release.tag_name }}  # 使用 release 事件的标签名称
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用默认令牌
