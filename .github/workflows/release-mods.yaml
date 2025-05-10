@@ -1,0 +1,58 @@
+name: Build, Test, and Release Minecraft Mod
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@3
+        with:
+            java-version: '17'
+            distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests with Gradle
+        run: ./gradlew test  # 运行测试步骤
+
+      - name: Build with Gradle
+        run: ./gradlew build  # 运行构建步骤
+
+  upload-assets:
+    runs-on: ubuntu-latest  # 运行环境
+    needs: build-and-test  # 依赖于 build-and-test 作业成功后运行
+    if: github.event_name == 'release'  # 仅在 release 事件时运行
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3  # 重新检出代码
+
+      - name: Find the main JAR file dynamically
+        id: find_jar
+        run: |
+          # 搜索 build/libs 下的 testmoddevelop-*.jar 文件，排除 sources.jar
+          JAR_FILE=$(find build/libs -type f -name "testmoddevelop-*.jar" ! -name "*sources.jar" | head -n 1)
+          if [ -z "$JAR_FILE" ]; then
+            echo "No matching JAR file found!" >&2
+            exit 1  # 如果未找到文件，退出并失败
+          fi
+          echo "::set-output name=jar_path::$JAR_FILE"  # 输出路径
+
+      - name: Upload the JAR file to GitHub Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}  # 指向当前 Release
+          asset_path: ${{ steps.find_jar.outputs.jar_path }}  # 使用动态路径
+          asset_name: ${{ steps.find_jar.outputs.jar_path }}  # 上传文件名保持原样，或自定义如 'testmoddevelop.jar'
+          asset_content_type: application/java-archive

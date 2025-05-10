@@ -36,7 +36,5 @@ run/
 
 hs_err_*.log
 replay_*.log
-*.hprof
+*.hprof.github/workflows
 *.jfr
-
-.github/workflows
